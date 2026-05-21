@@ -1,3 +1,90 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --color-beige:  #F5ECD7;
+    --color-brown:  #3D2B1F;
+    --color-orange: #C4622D;
+    --color-olive:  #6B7C45;
+    --color-cream:  #FDF6E3;
+  }
+
+  html {
+    font-family: 'DM Sans', sans-serif;
+    background-color: var(--color-cream);
+    color: var(--color-brown);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Fraunces', serif;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+  }
+
+  #root {
+    position: relative;
+    z-index: 1;
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--color-beige); }
+  ::-webkit-scrollbar-thumb { background: rgba(61,43,31,0.3); border-radius: 3px; }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-xl border border-ludo-brown/10 shadow-warm;
+  }
+
+  .btn-primary {
+    @apply bg-ludo-orange text-white font-medium px-4 py-2 rounded-lg
+           hover:bg-ludo-brown transition-colors duration-150 shadow-warm
+           active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply bg-ludo-beige text-ludo-brown font-medium px-4 py-2 rounded-lg
+           hover:bg-ludo-brown/10 transition-colors duration-150
+           active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply text-ludo-brown/70 font-medium px-3 py-2 rounded-lg
+           hover:bg-ludo-brown/8 transition-colors duration-150;
+  }
+
+  .input {
+    @apply w-full bg-white border border-ludo-brown/20 rounded-lg px-3 py-2
+           text-ludo-brown placeholder:text-ludo-brown/40
+           focus:outline-none focus:ring-2 focus:ring-ludo-orange/40
+           focus:border-ludo-orange transition-colors;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-owned    { @apply bg-ludo-olive/15 text-ludo-olive; }
+  .badge-wishlist { @apply bg-ludo-orange/15 text-ludo-orange; }
+  .badge-played   { @apply bg-ludo-brown/15 text-ludo-brown; }
+
+  .page-title {
+    @apply font-display text-2xl font-bold text-ludo-brown;
+  }
+
+  .section-title {
+    @apply font-display text-lg font-semibold text-ludo-brown;
+  }
+}
