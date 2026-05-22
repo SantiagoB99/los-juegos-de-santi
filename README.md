@@ -2,7 +2,7 @@
 
 Tracker personal de juegos de mesa. Guardá tu colección, registrá partidas y seguí las estadísticas con tus amigos.
 
-**[→ Abrir la app](https://santiagomartinbg.github.io/los-juegos-de-santi/)**
+**[→ Abrir la app](https://santiagob99.github.io/los-juegos-de-santi/)**
 
 ---
 
