@@ -1,14 +1,9 @@
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
-const PROD_PROXIES = [
-  (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  (url) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
-]
-
 async function bggFetch(path, { retries = 4, delayMs = 1500 } = {}) {
-  const tryUrl = async (url) => {
+  const tryUrl = async (url, headers = {}) => {
     for (let attempt = 0; attempt <= retries; attempt++) {
-      const res = await fetch(url)
+      const res = await fetch(url, headers ? { headers } : undefined)
       // BGG returns 202 when queuing data server-side — retry after delay
       if (res.status === 202) {
         if (attempt < retries) { await sleep(delayMs); continue }
@@ -23,19 +18,14 @@ async function bggFetch(path, { retries = 4, delayMs = 1500 } = {}) {
   }
 
   if (import.meta.env.DEV) {
+    // Dev: Vite proxy forwards to BGG with the token added server-side (vite.config.js)
     return tryUrl(`/bgg-api${path}`)
   }
 
-  const bggUrl = `https://boardgamegeek.com/xmlapi2${path}`
-  let lastError
-  for (const makeProxy of PROD_PROXIES) {
-    try {
-      return await tryUrl(makeProxy(bggUrl))
-    } catch (err) {
-      lastError = err
-    }
-  }
-  throw lastError
+  // Prod: direct BGG fetch — BGG supports CORS for registered apps with Bearer token
+  const token = import.meta.env.VITE_BGG_TOKEN
+  const headers = token ? { Authorization: `Bearer ${token}` } : {}
+  return tryUrl(`https://boardgamegeek.com/xmlapi2${path}`, headers)
 }
 
 export async function searchBGG(query) {

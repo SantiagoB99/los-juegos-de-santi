@@ -23,6 +23,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_BGG_TOKEN: ${{ secrets.VITE_BGG_TOKEN }}
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
