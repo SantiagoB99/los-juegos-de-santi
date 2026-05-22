@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { useFriends } from '../features/friends/hooks/useFriends'
+import { useStore } from '../lib/store'
 import { FriendsList } from '../features/friends/components/FriendsList'
 import { FriendStatsModal } from '../features/friends/components/FriendStatsModal'
 import { EmptyState } from '../components/EmptyState'
@@ -9,6 +10,7 @@ import { Modal } from '../components/Modal'
 
 export default function Friends() {
   const { friendStats, addFriend } = useFriends()
+  const removeFriend = useStore(s => s.removeFriend)
   const [selected, setSelected]   = useState(null)
   const [showAdd, setShowAdd]     = useState(false)
   const [newName, setNewName]     = useState('')
@@ -38,7 +40,7 @@ export default function Friends() {
           action={<Button onClick={() => setShowAdd(true)}>Agregar amigo</Button>}
         />
       ) : (
-        <FriendsList friends={friendStats} onSelect={setSelected} />
+        <FriendsList friends={friendStats} onSelect={setSelected} onRemove={removeFriend} />
       )}
 
       <FriendStatsModal

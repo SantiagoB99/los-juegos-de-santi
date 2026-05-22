@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Users, Clock, Star, Trophy, Plus } from 'lucide-react'
+import { ArrowLeft, Users, Clock, Star, Trophy, Plus, Trash2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { getBGGGame } from '../lib/bgg'
 import { StatusBadge } from '../components/Badge'
@@ -16,7 +16,9 @@ const STATUS_OPTIONS = [
 export default function GameDetail() {
   const { bggId } = useParams()
   const navigate  = useNavigate()
-  const { games, plays, updateGameStatus } = useStore()
+  const { games, plays, updateGameStatus, removeGame, removePlay } = useStore()
+  const [confirmRemoveGame, setConfirmRemoveGame] = useState(false)
+  const [confirmingPlayId, setConfirmingPlayId]   = useState(null)
 
   const savedGame  = games.find(g => g.bggId === bggId)
   const gamePlays  = plays
@@ -100,12 +102,26 @@ export default function GameDetail() {
           )}
 
           {savedGame && (
-            <div className="flex gap-2 flex-wrap pt-1">
+            <div className="flex gap-2 flex-wrap items-center pt-1">
               {STATUS_OPTIONS.filter(o => o.value !== savedGame.status).map(o => (
                 <Button key={o.value} variant="secondary" size="sm" onClick={() => updateGameStatus(bggId, o.value)}>
                   {o.label}
                 </Button>
               ))}
+              <div className="ml-auto">
+                {confirmRemoveGame ? (
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => { removeGame(bggId); navigate(-1) }} className="text-xs font-medium text-red-500 hover:text-red-700 px-2 py-1 bg-red-50 rounded">
+                      ¿Quitar de colección?
+                    </button>
+                    <button onClick={() => setConfirmRemoveGame(false)} className="text-xs text-ludo-brown/40 hover:text-ludo-brown px-1">×</button>
+                  </div>
+                ) : (
+                  <button onClick={() => setConfirmRemoveGame(true)} className="text-ludo-brown/20 hover:text-red-400 transition-colors p-1">
+                    <Trash2 size={15} />
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -141,8 +157,8 @@ export default function GameDetail() {
           <div className="space-y-2">
             {gamePlays.map(play => (
               <div key={play.id} className="card p-4">
-                <div className="flex items-start justify-between">
-                  <div>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-ludo-brown">{formatDate(play.playedAt)}</p>
                     <p className="text-xs text-ludo-brown/50 mt-0.5">
                       {play.players.map((p, i) => (
@@ -150,9 +166,23 @@ export default function GameDetail() {
                       ))}
                     </p>
                   </div>
-                  {play.location && (
-                    <span className="text-xs text-ludo-brown/40">{play.location}</span>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {play.location && confirmingPlayId !== play.id && (
+                      <span className="text-xs text-ludo-brown/40">{play.location}</span>
+                    )}
+                    {confirmingPlayId === play.id ? (
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => removePlay(play.id)} className="text-xs font-medium text-red-500 hover:text-red-700 px-2 py-0.5 bg-red-50 rounded">
+                          ¿Borrar?
+                        </button>
+                        <button onClick={() => setConfirmingPlayId(null)} className="text-xs text-ludo-brown/40 hover:text-ludo-brown px-1">×</button>
+                      </div>
+                    ) : (
+                      <button onClick={() => setConfirmingPlayId(play.id)} className="text-ludo-brown/20 hover:text-red-400 transition-colors p-1">
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 {play.notes && <p className="text-xs text-ludo-brown/60 mt-2 italic">"{play.notes}"</p>}
               </div>
