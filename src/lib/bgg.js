@@ -1,5 +1,12 @@
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
+function safeHttpsUrl(url) {
+  if (!url) return null
+  try {
+    return new URL(url).protocol === 'https:' ? url : null
+  } catch { return null }
+}
+
 async function bggFetch(path, { retries = 4, delayMs = 1500 } = {}) {
   const tryUrl = async (url, headers = {}) => {
     for (let attempt = 0; attempt <= retries; attempt++) {
@@ -57,8 +64,8 @@ export async function getBGGGame(id) {
       'Unknown',
     yearPublished:
       parseInt(item.querySelector('yearpublished')?.getAttribute('value')) || null,
-    thumbnail: item.querySelector('thumbnail')?.textContent?.trim() || null,
-    image:     item.querySelector('image')?.textContent?.trim() || null,
+    thumbnail: safeHttpsUrl(item.querySelector('thumbnail')?.textContent?.trim()),
+    image:     safeHttpsUrl(item.querySelector('image')?.textContent?.trim()),
     description: item.querySelector('description')?.textContent?.trim() || '',
     minPlayers: parseInt(item.querySelector('minplayers')?.getAttribute('value')) || 1,
     maxPlayers: parseInt(item.querySelector('maxplayers')?.getAttribute('value')) || 4,

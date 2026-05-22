@@ -65,6 +65,7 @@ export const useStore = create(
     }),
     {
       name: 'ludo_store',
+      version: 1,
     }
   )
 )

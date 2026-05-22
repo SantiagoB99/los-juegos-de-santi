@@ -4,9 +4,11 @@ import { Camera, X } from 'lucide-react'
 export function PhotoUpload({ preview, onSelect, onClear }) {
   const ref = useRef()
 
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+
   const handleChange = (e) => {
     const file = e.target.files?.[0]
-    if (!file) return
+    if (!file || !ALLOWED_TYPES.includes(file.type)) return
     const reader = new FileReader()
     reader.onload = (ev) => onSelect(ev.target.result)
     reader.readAsDataURL(file)
