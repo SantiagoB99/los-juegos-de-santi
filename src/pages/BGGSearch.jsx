@@ -4,6 +4,7 @@ import { useBGGSearch } from '../features/bgg-search/hooks/useBGGSearch'
 import { SearchBar } from '../features/bgg-search/components/SearchBar'
 import { SearchResultsList } from '../features/bgg-search/components/SearchResultsList'
 import { GamePreviewCard } from '../features/bgg-search/components/GamePreviewCard'
+import { Spinner } from '../components/Button'
 
 export default function BGGSearch() {
   const navigate = useNavigate()
@@ -28,6 +29,11 @@ export default function BGGSearch() {
             <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
               {error}
             </p>
+          )}
+          {loading && !results.length && !selected && (
+            <div className="flex justify-center py-16 text-ludo-brown/30">
+              <Spinner size={32} />
+            </div>
           )}
           <SearchResultsList
             results={results}
