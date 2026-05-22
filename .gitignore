@@ -23,3 +23,7 @@ dist-ssr/
 
 # Vite
 *.local
+
+# Internal planning docs (not for public repo)
+boardgame-tracker-prompt.md
+docs/superpowers/
