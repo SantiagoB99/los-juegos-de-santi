@@ -1,14 +1,35 @@
-const BGG_PROXY = 'https://api.allorigins.win/raw?url='
+const PROXIES = [
+  (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  (url) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+]
 
-async function bggFetch(url) {
-  const proxied = BGG_PROXY + encodeURIComponent(url)
-  const res = await fetch(proxied)
-  if (!res.ok) throw new Error(`BGG request failed: ${res.status}`)
-  const text = await res.text()
-  const parser = new DOMParser()
-  const xml = parser.parseFromString(text, 'text/xml')
-  if (xml.querySelector('parsererror')) throw new Error('Invalid XML response')
-  return xml
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+
+async function bggFetch(url, { retries = 4, delayMs = 1500 } = {}) {
+  let lastError
+  for (const makeProxy of PROXIES) {
+    const proxied = makeProxy(url)
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const res = await fetch(proxied)
+        // BGG returns 202 when data is being queued server-side — retry after delay
+        if (res.status === 202) {
+          if (attempt < retries) { await sleep(delayMs); continue }
+          throw new Error('BGG sigue procesando la solicitud. Intentá de nuevo en unos segundos.')
+        }
+        if (!res.ok) throw new Error(`BGG request failed: ${res.status}`)
+        const text = await res.text()
+        const parser = new DOMParser()
+        const xml = parser.parseFromString(text, 'text/xml')
+        if (xml.querySelector('parsererror')) throw new Error('Invalid XML response')
+        return xml
+      } catch (err) {
+        lastError = err
+        if (attempt < retries) await sleep(delayMs)
+      }
+    }
+  }
+  throw lastError
 }
 
 export async function searchBGG(query) {
