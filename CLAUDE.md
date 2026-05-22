@@ -143,12 +143,35 @@ Enter + transform only (not exit or opacity). Durations: panels 280–320ms, mod
 
 ---
 
+## Security
+
+### Content Security Policy
+`index.html` has a CSP `<meta>` tag restricting:
+- `script-src 'self'` — no external scripts
+- `img-src 'self' data: https://*.geekdo-images.com` — only BGG images + local data URIs (photos)
+- `connect-src 'self' https://boardgamegeek.com ws: wss:` — only BGG API + Vite HMR
+
+### BGG Token
+`VITE_BGG_TOKEN` is embedded in the production bundle (BGG's acknowledged tradeoff for client-side apps). Never commit `.env.local`. The token grants read-only BGG API access only.
+
+### Known safe patterns
+- No `dangerouslySetInnerHTML`, no `eval`, no `Function()` constructor
+- BGG image URLs validated as `https://` before storing (`safeHttpsUrl()` in `bgg.js`)
+- Photo uploads validate MIME type (jpeg/png/gif/webp only) before reading
+- Zustand store has `version: 1` for future schema migrations
+
+### Remaining low-priority items
+- GitHub Actions workflow uses floating `@v4` tags — pin to commit SHAs for supply chain hardening (see `deploy.yml`)
+
+---
+
 ## Verification Checklist
 
 Before considering a feature complete:
 - [ ] Works in local dev (`npm run dev`) — BGG proxy via Vite
 - [ ] `isMe` filter applied in all friend/rival stats
 - [ ] Photos use IndexedDB, not Zustand
-- [ ] No direct `boardgamegeek.com` fetch in browser (always through `/bgg-api` in dev or proxy in prod)
+- [ ] No direct `boardgamegeek.com` fetch in browser (always through `/bgg-api` in dev or prod direct with token)
 - [ ] HashRouter paths all start with `/#/`
 - [ ] No secrets committed to git
+- [ ] New image URLs from external APIs pass through `safeHttpsUrl()`
