@@ -43,7 +43,12 @@ export function PlayForm() {
   )
 
   const updatePlayer = (idx, field, value) => {
-    setPlayers(prev => prev.map((p, i) => i === idx ? { ...p, [field]: value } : p))
+    setPlayers(prev => prev.map((p, i) => {
+      if (i !== idx) return p
+      const updated = { ...p, [field]: value }
+      if (field === 'position' && value !== '') updated.winner = value === 1
+      return updated
+    }))
   }
 
   const removePlayer = (idx) => {
