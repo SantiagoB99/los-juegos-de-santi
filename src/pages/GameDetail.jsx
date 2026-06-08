@@ -6,6 +6,7 @@ import { getBGGGame } from '../lib/bgg'
 import { StatusBadge } from '../components/Badge'
 import { Button } from '../components/Button'
 import { formatDate } from '../lib/utils'
+import { PlayDetailModal } from '../features/plays/components/PlayDetailModal'
 
 const STATUS_OPTIONS = [
   { value: 'owned',    label: 'Lo tengo' },
@@ -19,6 +20,7 @@ export default function GameDetail() {
   const { games, plays, updateGameStatus, removeGame, removePlay } = useStore()
   const [confirmRemoveGame, setConfirmRemoveGame] = useState(false)
   const [confirmingPlayId, setConfirmingPlayId]   = useState(null)
+  const [selectedPlay, setSelectedPlay] = useState(null)
 
   const savedGame  = games.find(g => g.bggId === bggId)
   const gamePlays  = plays
@@ -156,7 +158,11 @@ export default function GameDetail() {
         ) : (
           <div className="space-y-2">
             {gamePlays.map(play => (
-              <div key={play.id} className="card p-4">
+              <div
+                key={play.id}
+                onClick={() => setSelectedPlay(play)}
+                className="card p-4 cursor-pointer hover:shadow-warm-lg hover:-translate-y-0.5 transition-all duration-200"
+              >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-ludo-brown">{formatDate(play.playedAt)}</p>
@@ -172,13 +178,22 @@ export default function GameDetail() {
                     )}
                     {confirmingPlayId === play.id ? (
                       <div className="flex items-center gap-1">
-                        <button onClick={() => removePlay(play.id)} className="text-xs font-medium text-red-500 hover:text-red-700 px-2 py-0.5 bg-red-50 rounded">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); removePlay(play.id) }}
+                          className="text-xs font-medium text-red-500 hover:text-red-700 px-2 py-0.5 bg-red-50 rounded"
+                        >
                           ¿Borrar?
                         </button>
-                        <button onClick={() => setConfirmingPlayId(null)} className="text-xs text-ludo-brown/40 hover:text-ludo-brown px-1">×</button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setConfirmingPlayId(null) }}
+                          className="text-xs text-ludo-brown/40 hover:text-ludo-brown px-1"
+                        >×</button>
                       </div>
                     ) : (
-                      <button onClick={() => setConfirmingPlayId(play.id)} className="text-ludo-brown/20 hover:text-red-400 transition-colors p-1">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setConfirmingPlayId(play.id) }}
+                        className="text-ludo-brown/20 hover:text-red-400 transition-colors p-1"
+                      >
                         <Trash2 size={14} />
                       </button>
                     )}
@@ -190,6 +205,12 @@ export default function GameDetail() {
           </div>
         )}
       </div>
+
+      <PlayDetailModal
+        play={selectedPlay}
+        isOpen={!!selectedPlay}
+        onClose={() => setSelectedPlay(null)}
+      />
     </div>
   )
 }
