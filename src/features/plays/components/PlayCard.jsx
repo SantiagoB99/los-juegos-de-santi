@@ -1,11 +1,9 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { MapPin, Trophy, Trash2 } from 'lucide-react'
 import { formatDate } from '../../../lib/utils'
 import { useStore } from '../../../lib/store'
 
-export function PlayCard({ play }) {
-  const navigate    = useNavigate()
+export function PlayCard({ play, onOpen }) {
   const removePlay  = useStore(s => s.removePlay)
   const [confirming, setConfirming] = useState(false)
 
@@ -22,7 +20,7 @@ export function PlayCard({ play }) {
 
   return (
     <div
-      onClick={() => navigate(`/juego/${play.bggId}`)}
+      onClick={() => onOpen(play)}
       className="card p-4 cursor-pointer hover:shadow-warm-lg hover:-translate-y-0.5 transition-all duration-200"
     >
       <div className="flex items-start justify-between gap-3">
@@ -52,7 +50,6 @@ export function PlayCard({ play }) {
           )}
         </div>
       </div>
-
       <div className="mt-2 flex items-center gap-2 flex-wrap">
         {play.players.map((p, i) => (
           <span key={i} className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
@@ -63,7 +60,6 @@ export function PlayCard({ play }) {
           </span>
         ))}
       </div>
-
       {play.notes && (
         <p className="mt-2 text-xs text-ludo-brown/50 italic line-clamp-1">"{play.notes}"</p>
       )}
