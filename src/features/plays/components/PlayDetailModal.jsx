@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react'
-import { Trophy } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Trophy, Share2 } from 'lucide-react'
+import { ShareCard } from './ShareCard'
+import { useSharePlay } from '../hooks/useSharePlay'
 import { Modal } from '../../../components/Modal'
 import { Button } from '../../../components/Button'
 import { PlayerRow } from './PlayerRow'
@@ -13,6 +15,8 @@ export function PlayDetailModal({ play, isOpen, onClose }) {
   const [editing, setEditing]   = useState(false)
   const [photo, setPhoto]       = useState(null)
   const [editState, setEditState] = useState(null)
+  const cardRef = useRef(null)
+  const { sharing, shareError, sharePlay } = useSharePlay()
 
   useEffect(() => {
     if (!isOpen || !play) return
@@ -75,7 +79,11 @@ export function PlayDetailModal({ play, isOpen, onClose }) {
   if (!play) return null
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={play.gameName} size="lg">
+    <>
+      <div style={{ position: 'fixed', left: '-9999px', top: '-9999px', zIndex: -1 }}>
+        <ShareCard ref={cardRef} play={play} photo={photo} />
+      </div>
+      <Modal isOpen={isOpen} onClose={onClose} title={play.gameName} size="lg">
       {editing ? (
         <div className="space-y-4">
           <div className="space-y-1">
@@ -149,8 +157,23 @@ export function PlayDetailModal({ play, isOpen, onClose }) {
           <Button variant="secondary" className="w-full justify-center" onClick={startEdit}>
             Editar partida
           </Button>
+          <Button
+            variant="secondary"
+            className="w-full justify-center"
+            onClick={() => sharePlay(cardRef, play)}
+            disabled={sharing}
+          >
+            <Share2 size={15} />
+            {sharing ? 'Generando…' : 'Compartir'}
+          </Button>
+          {shareError && (
+            <p className="text-xs text-red-500 text-center">
+              No se pudo generar la imagen
+            </p>
+          )}
         </div>
       )}
     </Modal>
+    </>
   )
 }
