@@ -40,6 +40,19 @@ export default function BGGSearch() {
             onSelect={selectGame}
             loading={loading && results.length === 0}
           />
+          {results.length > 0 && (
+            <p className="text-center text-xs text-ludo-brown/30 pt-2 pb-1">
+              Powered by{' '}
+              <a
+                href="https://boardgamegeek.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-ludo-brown/50 underline"
+              >
+                BoardGameGeek
+              </a>
+            </p>
+          )}
         </>
       )}
 
