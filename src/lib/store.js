@@ -47,6 +47,11 @@ export const useStore = create(
       removePlay: (id) =>
         set((s) => ({ plays: s.plays.filter(p => p.id !== id) })),
 
+      updatePlay: (id, changes) =>
+        set((s) => ({
+          plays: s.plays.map(p => p.id === id ? { ...p, ...changes } : p),
+        })),
+
       // Friends
       addFriend: (name) => {
         const id = generateId()
