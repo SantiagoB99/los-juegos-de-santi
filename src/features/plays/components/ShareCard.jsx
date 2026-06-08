@@ -94,8 +94,8 @@ export const ShareCard = forwardRef(function ShareCard({ play, photo }, ref) {
 
       {/* Players */}
       <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        {players.map((p, i) => (
-          <div key={i} style={{
+        {players.map((p) => (
+          <div key={p.name} style={{
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
