@@ -4,7 +4,7 @@ import { Plus, Search } from 'lucide-react'
 import { useStore } from '../../../lib/store'
 import { savePhoto } from '../../../lib/db'
 import { generateId } from '../../../lib/utils'
-import { getBGGGame } from '../../../lib/bgg'
+import { getBGGGame, searchBGG } from '../../../lib/bgg'
 import { Button } from '../../../components/Button'
 import { Modal } from '../../../components/Modal'
 import { PlayerRow } from './PlayerRow'
@@ -31,6 +31,10 @@ export function PlayForm() {
   const [showFriendModal, setShowFriendModal] = useState(false)
   const [newFriendName, setNewFriendName]     = useState('')
   const [saving, setSaving]                   = useState(false)
+  const [bggResults, setBggResults]         = useState([])
+  const [bggSearching, setBggSearching]     = useState(false)
+  const [bggError, setBggError]             = useState(null)
+  const [pendingBggGame, setPendingBggGame] = useState(null)
 
   useEffect(() => {
     if (preselectedBggId && !selectedGame) {
@@ -41,6 +45,26 @@ export function PlayForm() {
   const filteredGames = games.filter(g =>
     g.name.toLowerCase().includes(gameSearch.toLowerCase())
   )
+
+  const clearBggState = () => {
+    setBggResults([])
+    setBggError(null)
+    setPendingBggGame(null)
+    setBggSearching(false)
+  }
+
+  const handleBggSearch = async () => {
+    setBggSearching(true)
+    setBggError(null)
+    try {
+      const results = await searchBGG(gameSearch)
+      setBggResults(results)
+    } catch {
+      setBggError('No se pudo buscar en BGG. Intentá de nuevo.')
+    } finally {
+      setBggSearching(false)
+    }
+  }
 
   const updatePlayer = (idx, field, value) => {
     setPlayers(prev => prev.map((p, i) => {
@@ -98,7 +122,7 @@ export function PlayForm() {
       })
 
       if (!games.find(g => g.bggId === selectedGame.bggId)) {
-        addGame({ ...selectedGame, status: 'played' })
+        addGame({ ...selectedGame, status: selectedGame.status || 'played' })
       }
 
       let photoId = null
@@ -132,7 +156,7 @@ export function PlayForm() {
         {selectedGame ? (
           <div className="flex items-center justify-between p-3 bg-ludo-beige/60 rounded-lg">
             <span className="font-medium text-ludo-brown text-sm">{selectedGame.name}</span>
-            <button onClick={() => setSelectedGame(null)} className="text-xs text-ludo-brown/50 hover:text-ludo-orange">
+            <button onClick={() => { setSelectedGame(null); clearBggState() }} className="text-xs text-ludo-brown/50 hover:text-ludo-orange">
               Cambiar
             </button>
           </div>
@@ -144,9 +168,11 @@ export function PlayForm() {
                 className="input pl-8 text-sm"
                 placeholder="Buscar en mi colección…"
                 value={gameSearch}
-                onChange={(e) => setGameSearch(e.target.value)}
+                onChange={(e) => { setGameSearch(e.target.value); clearBggState() }}
               />
             </div>
+
+            {/* Collection results */}
             {filteredGames.length > 0 && (
               <div className="card max-h-48 overflow-y-auto divide-y divide-ludo-brown/8">
                 {filteredGames.map(g => (
@@ -159,6 +185,74 @@ export function PlayForm() {
                     {g.name}
                   </button>
                 ))}
+              </div>
+            )}
+
+            {/* BGG fallback */}
+            {filteredGames.length === 0 && gameSearch.length >= 2 && !pendingBggGame && (
+              <div className="space-y-2">
+                {bggResults.length === 0 && !bggSearching && (
+                  <button
+                    type="button"
+                    onClick={handleBggSearch}
+                    className="w-full text-left px-4 py-2 text-sm text-ludo-orange hover:underline"
+                  >
+                    Buscar "{gameSearch}" en BGG →
+                  </button>
+                )}
+                {bggSearching && (
+                  <p className="text-xs text-ludo-brown/50 px-1">Buscando en BGG…</p>
+                )}
+                {bggError && (
+                  <p className="text-xs text-red-500 px-1">{bggError}</p>
+                )}
+                {bggResults.length > 0 && (
+                  <div className="card max-h-48 overflow-y-auto divide-y divide-ludo-brown/8">
+                    <p className="px-4 py-1.5 text-xs text-ludo-brown/40 font-medium">Resultados de BGG</p>
+                    {bggResults.map(g => (
+                      <button
+                        key={g.bggId}
+                        type="button"
+                        onClick={() => setPendingBggGame(g)}
+                        className="w-full text-left px-4 py-2 text-sm text-ludo-brown hover:bg-ludo-beige/60 transition-colors"
+                      >
+                        {g.name}
+                        {g.yearPublished && <span className="text-ludo-brown/40 ml-1">({g.yearPublished})</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Status picker after selecting a BGG result */}
+            {pendingBggGame && (
+              <div className="card p-4 space-y-3">
+                <p className="text-sm font-medium text-ludo-brown">{pendingBggGame.name}</p>
+                <p className="text-xs text-ludo-brown/50">¿Cómo lo agregás a tu colección?</p>
+                <div className="flex gap-2 flex-wrap">
+                  {[
+                    { value: 'owned',    label: 'Lo tengo' },
+                    { value: 'wishlist', label: 'Lo quiero' },
+                    { value: 'played',   label: 'Lo jugué' },
+                  ].map(o => (
+                    <button
+                      key={o.value}
+                      type="button"
+                      onClick={() => { setSelectedGame({ ...pendingBggGame, status: o.value }); clearBggState() }}
+                      className="px-3 py-1.5 text-sm rounded-lg bg-ludo-beige border border-ludo-brown/20 text-ludo-brown hover:border-ludo-orange hover:text-ludo-orange transition-colors"
+                    >
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPendingBggGame(null)}
+                  className="text-xs text-ludo-brown/40 hover:text-ludo-brown"
+                >
+                  ← Volver
+                </button>
               </div>
             )}
           </div>
