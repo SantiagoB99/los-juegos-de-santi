@@ -122,7 +122,12 @@ export function PlayDetailModal({ play, isOpen, onClose }) {
             {play.location && <span>· {play.location}</span>}
           </div>
           <div className="space-y-1.5">
-            {play.players.map((p, i) => (
+            {[...play.players].sort((a, b) => {
+              if (a.position && b.position) return a.position - b.position
+              if (a.position) return -1
+              if (b.position) return 1
+              return 0
+            }).map((p, i) => (
               <div key={i} className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm ${
                 p.winner ? 'bg-ludo-orange/10' : 'bg-ludo-beige/40'
               }`}>
