@@ -248,7 +248,7 @@ export function PlayForm() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setPendingBggGame(null)}
+                  onClick={clearBggState}
                   className="text-xs text-ludo-brown/40 hover:text-ludo-brown"
                 >
                   ← Volver
