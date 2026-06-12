@@ -14,20 +14,32 @@ export function PlayDetailModal({ play, isOpen, onClose }) {
   const updatePlay = useStore(s => s.updatePlay)
   const [editing, setEditing]   = useState(false)
   const [photo, setPhoto]       = useState(null)
+  const [photoReady, setPhotoReady] = useState(false)
   const [editState, setEditState] = useState(null)
   const cardRef = useRef(null)
-  const { sharing, shareError, sharePlay } = useSharePlay()
+  const { preparing, shareBlob, prepareImage, sharePlay } = useSharePlay()
 
   useEffect(() => {
     if (!isOpen || !play) return
     setEditing(false)
     setEditState(null)
+    setPhotoReady(false)
     if (play.photoId) {
-      getPhoto(play.photoId).then(data => setPhoto(data || null))
+      getPhoto(play.photoId).then(data => {
+        setPhoto(data || null)
+        setPhotoReady(true)
+      })
     } else {
       setPhoto(null)
+      setPhotoReady(true)
     }
   }, [isOpen, play?.id])
+
+  useEffect(() => {
+    if (!isOpen || !photoReady) return
+    const raf = requestAnimationFrame(() => prepareImage(cardRef))
+    return () => cancelAnimationFrame(raf)
+  }, [isOpen, photoReady, prepareImage])
 
   const startEdit = () => {
     setEditState({
@@ -80,7 +92,7 @@ export function PlayDetailModal({ play, isOpen, onClose }) {
 
   return (
     <>
-      <div style={{ position: 'fixed', left: '-9999px', top: '-9999px', zIndex: -1 }}>
+      <div style={{ position: 'fixed', left: 0, top: 0, zIndex: -1, pointerEvents: 'none' }}>
         <ShareCard ref={cardRef} play={play} photo={photo} />
       </div>
       <Modal isOpen={isOpen} onClose={onClose} title={play.gameName} size="lg">
@@ -160,17 +172,12 @@ export function PlayDetailModal({ play, isOpen, onClose }) {
           <Button
             variant="secondary"
             className="w-full justify-center"
-            onClick={() => sharePlay(cardRef, play)}
-            disabled={sharing}
+            onClick={() => sharePlay(play)}
+            disabled={preparing || !shareBlob}
           >
             <Share2 size={15} />
-            {sharing ? 'Generando…' : 'Compartir'}
+            {preparing ? 'Generando…' : 'Compartir'}
           </Button>
-          {shareError && (
-            <p className="text-xs text-red-500 text-center">
-              No se pudo generar la imagen
-            </p>
-          )}
         </div>
       )}
     </Modal>
