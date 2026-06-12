@@ -27,3 +27,6 @@ dist-ssr/
 # Internal planning docs (not for public repo)
 boardgame-tracker-prompt.md
 docs/superpowers/
+
+# Backups descargados (datos personales — jamás al repo público)
+los-juegos-de-santi-backup-*.json
