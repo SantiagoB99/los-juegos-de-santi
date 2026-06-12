@@ -36,3 +36,12 @@ export function truncate(str, maxLen = 200) {
   if (!str || str.length <= maxLen) return str
   return str.slice(0, maxLen).trimEnd() + '…'
 }
+
+// Las fechas guardadas con el bug de timezone quedaron en medianoche UTC
+// (se mostraban como el día anterior en UTC-3). Corregir corriéndolas a mediodía UTC.
+export function fixUtcMidnight(iso) {
+  if (typeof iso === 'string' && iso.endsWith('T00:00:00.000Z')) {
+    return new Date(new Date(iso).getTime() + 12 * 60 * 60 * 1000).toISOString()
+  }
+  return iso
+}

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { generateId, generateColor } from './utils'
+import { generateId, generateColor, fixUtcMidnight } from './utils'
+import { deletePhoto } from './db'
 
 export const useStore = create(
   persist(
@@ -10,6 +11,10 @@ export const useStore = create(
       games: [],
       plays: [],
       friends: [],
+      // Backup metadata (local del dispositivo — no viaja en el backup)
+      lastExportAt: null,
+      playsAtLastExport: 0,
+      reminderDismissedAt: null,
 
       // Me
       setMe: (me) => set({ me }),
@@ -44,8 +49,11 @@ export const useStore = create(
           plays: [...s.plays, { ...play, id: generateId() }],
         })),
 
-      removePlay: (id) =>
-        set((s) => ({ plays: s.plays.filter(p => p.id !== id) })),
+      removePlay: (id) => {
+        const play = get().plays.find(p => p.id === id)
+        if (play?.photoId) deletePhoto(play.photoId).catch(() => {})
+        set((s) => ({ plays: s.plays.filter(p => p.id !== id) }))
+      },
 
       updatePlay: (id, changes) =>
         set((s) => ({
@@ -67,10 +75,32 @@ export const useStore = create(
 
       removeFriend: (id) =>
         set((s) => ({ friends: s.friends.filter(f => f.id !== id) })),
+
+      // Backup
+      recordExport: () =>
+        set((s) => ({
+          lastExportAt: new Date().toISOString(),
+          playsAtLastExport: s.plays.length,
+        })),
+
+      dismissBackupReminder: () =>
+        set({ reminderDismissedAt: new Date().toISOString() }),
+
+      replaceAll: ({ me, games, plays, friends }) =>
+        set({ me, games, plays, friends }),
     }),
     {
       name: 'ludo_store',
-      version: 1,
+      version: 2,
+      migrate: (state, version) => {
+        if (version < 2) {
+          state.plays = (state.plays || []).map(p => ({
+            ...p,
+            playedAt: fixUtcMidnight(p.playedAt),
+          }))
+        }
+        return state
+      },
     }
   )
 )
