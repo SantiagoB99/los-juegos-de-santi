@@ -45,3 +45,24 @@ export async function deletePhoto(id) {
     tx.onerror = (e) => reject(e.target.error)
   })
 }
+
+// Import de backup: escribir una foto preservando su id original
+export async function putPhoto(id, base64) {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite')
+    tx.objectStore(STORE_NAME).put({ id, data: base64 })
+    tx.oncomplete = () => resolve(id)
+    tx.onerror = (e) => reject(e.target.error)
+  })
+}
+
+export async function clearPhotos() {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite')
+    tx.objectStore(STORE_NAME).clear()
+    tx.oncomplete = () => resolve()
+    tx.onerror = (e) => reject(e.target.error)
+  })
+}
