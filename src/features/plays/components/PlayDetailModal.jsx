@@ -77,7 +77,7 @@ export function PlayDetailModal({ play, isOpen, onClose }) {
       photoId = editState.photoPreview ? await savePhoto(editState.photoPreview) : null
     }
     updatePlay(play.id, {
-      playedAt: new Date(editState.date).toISOString(),
+      playedAt: new Date(`${editState.date}T12:00:00`).toISOString(),
       location: editState.location.trim() || null,
       notes: editState.notes.trim() || null,
       players: editState.players,

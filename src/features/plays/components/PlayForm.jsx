@@ -133,7 +133,7 @@ export function PlayForm() {
       addPlay({
         bggId: selectedGame.bggId,
         gameName: selectedGame.name,
-        playedAt: new Date(date).toISOString(),
+        playedAt: new Date(`${date}T12:00:00`).toISOString(),
         location: location.trim() || null,
         notes: notes.trim() || null,
         photoId,
