@@ -6,6 +6,7 @@ import { PlaysBarChart } from '../features/dashboard/components/PlaysBarChart'
 import { RecentPlaysList } from '../features/dashboard/components/RecentPlaysList'
 import { FriendsRanking } from '../features/dashboard/components/FriendsRanking'
 import { Button } from '../components/Button'
+import { BackupReminder } from '../features/dashboard/components/BackupReminder'
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -17,6 +18,7 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-4">
+      <BackupReminder />
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl font-bold text-ludo-brown">
           Buen día, <span className="text-ludo-orange">{stats.me.name}</span> 👋
