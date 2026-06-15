@@ -45,7 +45,7 @@ export default function Settings() {
       setPending(null)
       navigate('/')
     } catch {
-      setError('No se pudo importar el backup. Tus datos actuales no se modificaron.')
+      setError('No se pudo importar el backup. Tus partidas están intactas, pero las fotos pueden haberse perdido.')
       setPending(null)
     } finally {
       setBusy(false)
