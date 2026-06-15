@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Library, Dices, Users } from 'lucide-react'
+import { LayoutDashboard, Library, Dices, Users, Settings } from 'lucide-react'
 
 const NAV = [
   { to: '/',          icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/coleccion', icon: Library,         label: 'Colección' },
   { to: '/partidas',  icon: Dices,           label: 'Partidas' },
   { to: '/amigos',    icon: Users,           label: 'Amigos' },
+  { to: '/ajustes',  icon: Settings,        label: 'Ajustes' },
 ]
 
 export function Sidebar() {

@@ -9,6 +9,7 @@ import GameDetail from './pages/GameDetail'
 import Plays      from './pages/Plays'
 import NewPlay    from './pages/NewPlay'
 import Friends    from './pages/Friends'
+import Settings   from './pages/Settings'
 
 export default function App() {
   const me = useStore((s) => s.me)
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/partidas"         element={<Plays />} />
           <Route path="/partidas/nueva"   element={<NewPlay />} />
           <Route path="/amigos"           element={<Friends />} />
+          <Route path="/ajustes"          element={<Settings />} />
         </Routes>
       </Layout>
     </HashRouter>
